@@ -7,7 +7,6 @@
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
 import mysql.connector
-import time
 
 class HousingScrapyPipeline:
     def open_spider(self, spider):
@@ -91,4 +90,15 @@ class HousingScrapyPipeline:
         self.connection.commit()
         
         return item
+class SaveToRealEstateDealPipeline:
+    def open_spider(self, spider):
+        # Code to open database connection
+        pass
 
+    def close_spider(self, spider):
+        # Code to close database connection
+        pass
+
+    def process_item(self, item, spider):
+        # Code to save the item to the database
+        pass
