@@ -7,7 +7,7 @@
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
 import mysql.connector
-
+from housing_scrapy.items import RealEstatePriceScrapyItem
 class HousingScrapyPipeline:
     def open_spider(self, spider):
         self.connection = mysql.connector.connect(
@@ -92,13 +92,27 @@ class HousingScrapyPipeline:
         return item
 class SaveToRealEstateDealPipeline:
     def open_spider(self, spider):
-        # Code to open database connection
-        pass
+        self.real_connection = mysql.connector.connect(
+            host='localhost',
+            user='root',
+            password='@America155088',
+            database='real_estate_db'
+        )
+        self.real_cursor = self.real_connection.cursor()
 
     def close_spider(self, spider):
-        # Code to close database connection
-        pass
+        self.real_cursor.close()
+        self.real_connection.close()
 
     def process_item(self, item, spider):
-        # Code to save the item to the database
-        pass
+        if isinstance(item, RealEstatePriceScrapyItem):
+            
+            # SQL insert
+            self.real_cursor.execute("""
+                INSERT INTO real_estate_deal (address, build_area, build_total_price, date, floor, park_area, park_price, parking_type, room, total_build_area, total_floor, unit_price)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """, (
+                    
+                ))
+            self.real_connection.commit()
+        return item
