@@ -130,7 +130,7 @@ class ScrapyHouseSpider(scrapy.Spider):
         real_item = RealEstatePriceScrapyItem()
         real_resp = json.loads(response.body)
         real_items = real_resp['data']['items']
-
+        
         for real_item_json in real_items:
             real_item['date'] = real_item_json.get('date')
             real_item['floor'] = real_item_json.get('shift_floor')
@@ -144,7 +144,6 @@ class ScrapyHouseSpider(scrapy.Spider):
             real_item['park_price'] = real_item_json.get('real_park_total_price')
             real_item['parking_type'] = real_item_json.get('park_type_str')
             real_item['total_floor'] = real_item_json.get('total_floor')
-        
         if not real_items:
             yield real_item
         

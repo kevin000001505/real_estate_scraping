@@ -7,6 +7,7 @@
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
 import mysql.connector
+import time
 
 class HousingScrapyPipeline:
     def open_spider(self, spider):
@@ -20,23 +21,28 @@ class HousingScrapyPipeline:
     def close_spider(self, spider):
         self.cursor.close()
         self.connection.close()
+    
     def process_item(self, item, spider):
-        if not item['price']:
-            item['price'] = 0
-        if item['year'] is not None and '年' in item['year']:
-            item['year'] = int(item['year'].replace("年", ""))
+    
+        year = item.get('year', None)
+        if year is not None and '年' in year:
+            item['year'] = int(year.replace("年", ""))
 
-        if item['browse_num'] is not None and ',' in item['browse_num']:
-            item['browse_num'] = int(item['browse_num'].replace(",", ""))
+        browse_num = item.get('browse_num', None)
+        if browse_num and ',' in browse_num:
+            item['browse_num'] = int(browse_num.replace(",", ""))
 
-        if item['public_equipment'] is not None and '~' in item['public_equipment']:
+        public = item.get('public_equipment', None)
+        if public is not None and '~' in public:
             parts = item['public_equipment'].replace("%", "").split('~')
             item['public_equipment'] = (float(parts[0])+float(parts[1]))/2
 
-        if item['cover_percentage'] is not None and '%' in item['cover_percentage']:
+        cover = item.get('cover_percentage', None)
+        if cover is not None and '%' in cover:
             item['cover_percentage'] = float(item['cover_percentage'].replace("%", ""))
 
-        if item['total_resident'] is not None and '戶' in item['total_resident']:
+        resident = item.get('total_resident', None)
+        if resident is not None and '戶' in resident:
             item['total_resident'] = int(item['total_resident'].replace("戶", "").replace(",", ""))
 
         self.cursor.execute("""
