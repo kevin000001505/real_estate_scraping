@@ -32,12 +32,12 @@ class HousingScrapyPipeline:
             item['public_equipment'] = (float(parts[0])+float(parts[1]))/2
 
         if item['cover_percentage'] is not None and '%' in item['cover_percentage']:
-            item['cover_percentage'] = int(item['cover_percentage'].replace("%", ""))
+            item['cover_percentage'] = float(item['cover_percentage'].replace("%", ""))
 
         if item['total_resident'] is not None and '戶' in item['total_resident']:
             item['total_resident'] = int(item['total_resident'].replace("戶", ""))
         self.cursor.execute("""
-            INSERT INTO properties (name, region, section, simple_address, current_sale_num, building_purpose, 
+            INSERT INTO real_esate_table (name, region, section, simple_address, current_sale_num, building_purpose, 
                                     browse_num, rent_num, agent_company, total_sold, price, station_name, latitude, 
                                     longitude, year, total_resident, building_type, usage_plan, cover_percentage, 
                                     public_equipment, building_structure, foundation_area, management_cost, 
