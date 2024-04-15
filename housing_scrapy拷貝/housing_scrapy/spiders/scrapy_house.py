@@ -19,9 +19,8 @@ class ScrapyHouseSpider(scrapy.Spider):
         except KeyError:
             print('No such region number: ', self.region_num)
             self.region_num += 1
-            self.page = 1
             yield scrapy.Request(
-                url = f'https://bff.591.com.tw/v2/community/search/list?page={self.page}&regionid={self.region_num}&from=3',
+                url = f'https://bff.591.com.tw/v2/community/search/list?page=1&regionid={self.region_num}&from=3',
                 callback=self.parse
             )
 
@@ -29,7 +28,7 @@ class ScrapyHouseSpider(scrapy.Spider):
             self.region_num += 1
             self.page = 1
             yield scrapy.Request(
-                url = f'https://bff.591.com.tw/v2/community/search/list?page={self.page}&regionid={self.region_num}&from=3',
+                url = f'https://bff.591.com.tw/v2/community/search/list?page=1&regionid={self.region_num}&from=3',
                 callback=self.parse
             )
         else:
