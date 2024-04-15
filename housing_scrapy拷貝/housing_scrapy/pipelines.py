@@ -23,6 +23,7 @@ class HousingScrapyPipeline:
     def process_item(self, item, spider):
         if not item['price']:
             item['price'] = 0
+
         if item['year'] is not None and '年' in item['year']:
             item['year'] = int(item['year'].replace("年", ""))
 
@@ -38,6 +39,7 @@ class HousingScrapyPipeline:
 
         if item['total_resident'] is not None and '戶' in item['total_resident']:
             item['total_resident'] = int(item['total_resident'].replace("戶", ""))
+
         self.cursor.execute("""
             INSERT INTO real_esate_table (name, region, section, simple_address, current_sale_num, building_purpose, 
                                     browse_num, rent_num, agent_company, total_sold, price, station_name, latitude, 
@@ -85,6 +87,3 @@ class HousingScrapyPipeline:
         
         return item
 
-    def store_in_db(self, item):
-        
-        print(f"Storing in DB: {item}")
