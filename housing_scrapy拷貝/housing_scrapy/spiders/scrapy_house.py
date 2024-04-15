@@ -18,10 +18,19 @@ class ScrapyHouseSpider(scrapy.Spider):
         self.page = 1
         
     def parse(self, response):
-        
+    
         resp = json.loads(response.body)
+        try:
+            items = resp['data']['items']
+        except KeyError:
+            print('No such region number: ', self.region_num)
+            self.region_num += 1
+            self.page = 1
+            yield scrapy.Request(
+                url = f'https://bff.591.com.tw/v2/community/search/list?page={self.page}&regionid={self.region_num}&from=3&post_type=2,8',
+                callback=self.parse
+            )
 
-        items = resp['data']['items']
         if not items:
             self.region_num += 1
             self.page = 1
