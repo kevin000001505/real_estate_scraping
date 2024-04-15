@@ -50,16 +50,16 @@ class ScrapyHouseSpider(scrapy.Spider):
                 item['region'] = item_json.get('region')
                 item['section'] = item_json.get('section')
                 item['simple_address'] = item_json.get('simple_address')
-                item['current_sale_num'] = item_json.get('sale_num', 0)
+                item['current_sale_num'] = int(item_json.get('sale_num', 0))
                 item['building_purpose'] = item_json.get('build_purpose_simple')
-                item['browse_num'] = item_json.get('browse_num')
+                item['browse_num'] = int(item_json.get('browse_num'))
                 item['rent_num'] = item_json.get('rent_num')
                 item['agent_company'] = agent_company
                 item['total_sold'] = item_json.get('price_num')
                 item['price'] = item_json['price']['price']
                 item['station_name'] = item_json.get('station_name', 'No station name')
-                item['latitude'] = item_json.get('lat')
-                item['longitude'] = item_json.get('lng')
+                item['latitude'] = float(item_json.get('lat'))
+                item['longitude'] = float(item_json.get('lng'))
 
                 yield response.follow(url=f'https://market.591.com.tw/{id}', callback=self.extract_data, meta={'item': item})
 
