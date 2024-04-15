@@ -56,7 +56,7 @@ class ScrapyHouseSpider(scrapy.Spider):
                 item['rent_num'] = item_json.get('rent_num')
                 item['agent_company'] = agent_company
                 item['total_sold'] = item_json.get('price_num')
-                item['price'] = item_json['price']['price']
+                item['price'] = float(item_json['price']['price'])
                 item['station_name'] = item_json.get('station_name', 'No station name')
                 item['latitude'] = float(item_json.get('lat'))
                 item['longitude'] = float(item_json.get('lng'))
