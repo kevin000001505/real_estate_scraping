@@ -11,12 +11,11 @@ class HousingScrapyItem(scrapy.Item):
     region = scrapy.Field()
     section = scrapy.Field()
     simple_address = scrapy.Field()
-    sale_num = scrapy.Field()
+    current_sale_num = scrapy.Field()
     building_purpose = scrapy.Field()
     browse_num = scrapy.Field()
     rent_num = scrapy.Field()
     agent_company = scrapy.Field()
-    current_sold_num = scrapy.Field()  # Assuming this is meant to be 'current_sold_num'
     total_sold = scrapy.Field()
     price = scrapy.Field()
     station_name = scrapy.Field()

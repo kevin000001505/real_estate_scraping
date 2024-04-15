@@ -11,7 +11,7 @@ import time
 class ScrapyHouseSpider(scrapy.Spider):
     name = 'scrapy_house'
     allowed_domains = ['market.591.com.tw']
-    start_urls = ['https://bff.591.com.tw/v2/community/search/list?page=1&regionid=1&from=3&post_type=2,8']
+    start_urls = ['https://bff.591.com.tw/v2/community/search/list?page=1&regionid=1&from=3']
     
     def __init__(self):
         self.region_num = 1
@@ -27,7 +27,7 @@ class ScrapyHouseSpider(scrapy.Spider):
             self.region_num += 1
             self.page = 1
             yield scrapy.Request(
-                url = f'https://bff.591.com.tw/v2/community/search/list?page={self.page}&regionid={self.region_num}&from=3&post_type=2,8',
+                url = f'https://bff.591.com.tw/v2/community/search/list?page={self.page}&regionid={self.region_num}&from=3',
                 callback=self.parse
             )
 
@@ -35,7 +35,7 @@ class ScrapyHouseSpider(scrapy.Spider):
             self.region_num += 1
             self.page = 1
             yield scrapy.Request(
-                url = f'https://bff.591.com.tw/v2/community/search/list?page={self.page}&regionid={self.region_num}&from=3&post_type=2,8',
+                url = f'https://bff.591.com.tw/v2/community/search/list?page={self.page}&regionid={self.region_num}&from=3',
                 callback=self.parse
             )
         else:
@@ -56,18 +56,12 @@ class ScrapyHouseSpider(scrapy.Spider):
                 item['region'] = item_json.get('region')
                 item['section'] = item_json.get('section')
                 item['simple_address'] = item_json.get('simple_address')
-                item['sale_num'] = item_json.get('sale_num', 0)
+                item['current_sale_num'] = item_json.get('sale_num', 0)
                 item['building_purpose'] = item_json.get('build_purpose_simple')
                 item['browse_num'] = item_json.get('browse_num')
                 item['rent_num'] = item_json.get('rent_num')
                 item['agent_company'] = agent_company
                 item['sub_company'] = sub_company
-                tags = item_json.get('tag', [])
-                if tags:  # Check if the list is not empty
-                    item['current_sold_num'] = tags[0].get('tag_str', 'No tag info')
-                else:
-                    item['current_sold_num'] = 'No tag info'
-
                 item['total_sold'] = item_json.get('price_num')
                 item['price'] = item_json['price']['price']
                 item['station_name'] = item_json.get('station_name', 'No station name')
@@ -76,7 +70,7 @@ class ScrapyHouseSpider(scrapy.Spider):
 
                 self.page += 1
                 yield scrapy.Request(
-                    url=f'https://bff.591.com.tw/v2/community/search/list?page={self.page}&regionid={self.region_num}&from=3&post_type=2,8',
+                    url=f'https://bff.591.com.tw/v2/community/search/list?page={self.page}&regionid={self.region_num}&from=3',
                     callback = self.parse,
                     dont_filter=True
                 )
@@ -105,3 +99,4 @@ class ScrapyHouseSpider(scrapy.Spider):
             item['school_region'] = table.xpath(".//li[19]/p/text()").get()
             
             yield item
+
