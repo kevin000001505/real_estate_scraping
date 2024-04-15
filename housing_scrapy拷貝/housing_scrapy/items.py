@@ -41,4 +41,17 @@ class HousingScrapyItem(scrapy.Item):
     garbage_management = scrapy.Field()
     school_region = scrapy.Field()
 
-
+class RealEstatePriceScrapyItem(scrapy.Item):
+    date = scrapy.Field()
+    floor = scrapy.Field()
+    unit_price = scrapy.Field()
+    address = scrapy.Field()
+    room = scrapy.Field()
+    total_build_area = scrapy.Field()
+    build_area = scrapy.Field()
+    park_area = scrapy.Field()
+    build_total_price = scrapy.Field()
+    park_price = scrapy.Field()
+    parking_type = scrapy.Field()
+    total_floor = scrapy.Field()
+    
