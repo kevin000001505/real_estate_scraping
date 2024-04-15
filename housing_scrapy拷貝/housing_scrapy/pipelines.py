@@ -6,9 +6,20 @@
 
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
-
+import mysql.connector
 
 class HousingScrapyPipeline:
+    def open_spider(self, spider):
+        self.connection = mysql.connector.connect(
+            host='localhost',
+            user='root',
+            password='@America155088',
+            database='real_estate_db'
+        )
+        self.cursor = self.connection.cursor()
+    def close_spider(self, spider):
+        self.cursor.close()
+        self.connection.close()
     def process_item(self, item, spider):
         if '年' in item['year']:
             item['year'] = int(item['year'].replace("年", ""))
@@ -21,6 +32,8 @@ class HousingScrapyPipeline:
             item['cover_percentage'] = int(item['cover_percentage'].replace("%", ""))
         if '戶' in item['total_resident']:
             item['total_resident'] = int(item['total_resident'].replace("戶", ""))
+
+        
         return item
 
     def store_in_db(self, item):
