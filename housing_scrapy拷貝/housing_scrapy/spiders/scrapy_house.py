@@ -10,7 +10,7 @@ class ScrapyHouseSpider(scrapy.Spider):
     def __init__(self):
         self.region_num = 1
         self.page = 1
-        
+        self.first_id = 0
     def parse(self, response):
     
         resp = json.loads(response.body)
@@ -24,7 +24,7 @@ class ScrapyHouseSpider(scrapy.Spider):
                 callback=self.parse
             )
 
-        if not items:
+        if not items or items[0]['id'] == self.first_id:
             self.region_num += 1
             self.page = 1
             yield scrapy.Request(
@@ -32,6 +32,8 @@ class ScrapyHouseSpider(scrapy.Spider):
                 callback=self.parse
             )
         else:
+            if self.page == 1:
+                self.first_id = items[0]['id']
             for item_json in items:
                 item = HousingScrapyItem()
                 id = item_json.get('id')
