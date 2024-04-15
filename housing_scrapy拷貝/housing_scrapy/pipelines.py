@@ -21,20 +21,20 @@ class HousingScrapyPipeline:
         self.cursor.close()
         self.connection.close()
     def process_item(self, item, spider):
-        if '年' in item['year'] and item['year'] is not None:
+        if item['year'] is not None and '年' in item['year']:
             item['year'] = int(item['year'].replace("年", ""))
 
-        if ',' in item['browse_num'] and item['browse_num'] is not None:
+        if item['browse_num'] is not None and ',' in item['browse_num']:
             item['browse_num'] = int(item['browse_num'].replace(",", ""))
 
-        if '~' in item['public_equipment'] and item['public_equipment'] is not None:
+        if item['public_equipment'] is not None and '~' in item['public_equipment']:
             parts = item['public_equipment'].replace("%", "").split('~')
             item['public_equipment'] = (float(parts[0])+float(parts[1]))/2
 
-        if '%' in item['cover_percentage'] and item['cover_percentage'] is not None:
+        if item['cover_percentage'] is not None and '%' in item['cover_percentage']:
             item['cover_percentage'] = int(item['cover_percentage'].replace("%", ""))
 
-        if '戶' in item['total_resident'] and item['total_resident'] is not None:
+        if item['total_resident'] is not None and '戶' in item['total_resident']:
             item['total_resident'] = int(item['total_resident'].replace("戶", ""))
         self.cursor.execute("""
             INSERT INTO properties (name, region, section, simple_address, current_sale_num, building_purpose, 
