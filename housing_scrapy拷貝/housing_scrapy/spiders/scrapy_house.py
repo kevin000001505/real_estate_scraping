@@ -2,7 +2,6 @@ import scrapy
 import json
 from housing_scrapy.items import HousingScrapyItem
 import time
-
 class ScrapyHouseSpider(scrapy.Spider):
     name = 'scrapy_house'
     allowed_domains = ['market.591.com.tw']

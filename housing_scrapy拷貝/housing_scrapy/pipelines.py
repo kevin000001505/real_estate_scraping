@@ -11,3 +11,7 @@ from itemadapter import ItemAdapter
 class HousingScrapyPipeline:
     def process_item(self, item, spider):
         return item
+
+    def store_in_db(self, item):
+        # This is a placeholder function to illustrate storing in a database
+        print(f"Storing in DB: {item}")
