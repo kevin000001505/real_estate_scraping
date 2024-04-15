@@ -20,6 +20,9 @@ class HousingScrapyItem(scrapy.Item):
     price = scrapy.Field()
     station_name = scrapy.Field()
     sub_company = scrapy.Field()
+    latitude = scrapy.Field()
+    longitude = scrapy.Field()
+    # building details
     year = scrapy.Field()
     total_resident = scrapy.Field()
     building_type = scrapy.Field()
@@ -38,3 +41,5 @@ class HousingScrapyItem(scrapy.Item):
     room_management = scrapy.Field()
     garbage_management = scrapy.Field()
     school_region = scrapy.Field()
+
+
