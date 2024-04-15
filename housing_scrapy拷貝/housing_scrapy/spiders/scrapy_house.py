@@ -1,19 +1,22 @@
 import scrapy
 import json
 from housing_scrapy.items import HousingScrapyItem
+from housing_scrapy.items import RealEstatePriceScrapyItem
 import time
 class ScrapyHouseSpider(scrapy.Spider):
     name = 'scrapy_house'
-    allowed_domains = ['market.591.com.tw']
+    allowed_domains = ['market.591.com.tw', 'bff.591.com.tw']
     start_urls = ['https://bff.591.com.tw/v2/community/search/list?page=1&regionid=1&from=3']
     
     def __init__(self):
         self.region_num = 1
         self.page = 1
         self.first_id = 0
+        
     def parse(self, response):
     
         resp = json.loads(response.body)
+        # check if region_number exists
         try:
             items = resp['data']['items']
         except KeyError:
@@ -23,7 +26,7 @@ class ScrapyHouseSpider(scrapy.Spider):
                 url = f'https://bff.591.com.tw/v2/community/search/list?page=1&regionid={self.region_num}&from=3',
                 callback=self.parse
             )
-
+        # check if api data duplicated or no data
         if not items or items[0]['id'] == self.first_id:
             self.region_num += 1
             self.page = 1
@@ -32,12 +35,15 @@ class ScrapyHouseSpider(scrapy.Spider):
                 callback=self.parse
             )
         else:
+            # record the first page first data id
             if self.page == 1:
                 self.first_id = items[0]['id']
+            # start to get the first page data
             for item_json in items:
                 item = HousingScrapyItem()
-                id = item_json.get('id')
+                self.id = item_json.get('id')
                 agent_info = item_json.get('agent', [])
+
                 if isinstance(agent_info, list) and agent_info:
                     # Example: using the first agent's information if available
                     first_agent = agent_info[0]  # Assuming there is at least one agent in the list
@@ -62,8 +68,14 @@ class ScrapyHouseSpider(scrapy.Spider):
                 item['latitude'] = float(item_json.get('lat'))
                 item['longitude'] = float(item_json.get('lng'))
 
-                yield response.follow(url=f'https://market.591.com.tw/{id}', callback=self.extract_data, meta={'item': item})
-
+                # call the extract building inform data
+                yield scrapy.Request(url=f'https://market.591.com.tw/{self.id}', callback=self.extract_data, meta={'item': item})
+                
+                # extract the real estate deal data
+                self.real_page = 1
+                yield scrapy.Request(url=f'https://bff.591.com.tw/v1/community/price/lists?community_id={self.id}&split_park=1&page=1&page_size=20&_source=0', callback=self.extract_real_price_data)
+                
+                # after extracting turn to next page
                 self.page += 1
                 yield scrapy.Request(
                     url=f'https://bff.591.com.tw/v2/community/search/list?page={self.page}&regionid={self.region_num}&from=3',
@@ -111,6 +123,32 @@ class ScrapyHouseSpider(scrapy.Spider):
                 item['room_management'] = table.xpath(".//li[17]/p/text()").get()
                 item['garbage_management'] = table.xpath(".//li[18]/p/text()").get()
                 item['school_region'] = table.xpath(".//li[19]/p/text()").get()
-            
-                yield item
+        yield item
+                
 
+    def extract_real_price_data(self, response):
+        real_item = RealEstatePriceScrapyItem()
+        real_resp = json.loads(response.body)
+        real_items = real_resp['data']['items']
+
+        for real_item_json in real_items:
+            real_item['date'] = real_item_json.get('date')
+            real_item['floor'] = real_item_json.get('shift_floor')
+            real_item['unit_price'] = real_item_json['unit_price'].get('price')
+            real_item['address'] = real_item_json.get('address')
+            real_item['room'] = real_item_json.get('layout_v2')
+            real_item['total_build_area'] = real_item_json.get('build_area')
+            real_item['build_area'] = real_item_json['building_area'].get('area')
+            real_item['park_area'] = real_item_json['real_park_area'].get('area')
+            real_item['build_total_price'] = real_item_json['building_total_price'].get('price')
+            real_item['park_price'] = real_item_json.get('real_park_total_price')
+            real_item['parking_type'] = real_item_json.get('park_type_str')
+            real_item['total_floor'] = real_item_json.get('total_floor')
+        
+        if not real_items:
+            yield real_item
+        
+        self.real_page += 1
+        yield response.follow(url = f'https://bff.591.com.tw/v1/community/price/lists?community_id={self.id}&split_park=1&page={self.real_page}&page_size=20&_source=0', callback=self.extract_real_price_data)
+        
+        

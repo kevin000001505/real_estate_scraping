@@ -17,7 +17,7 @@ class HousingScrapyItem(scrapy.Item):
     rent_num = scrapy.Field()
     agent_company = scrapy.Field()
     total_sold = scrapy.Field()
-    price = scrapy.Field()
+    price = scrapy.Field(default=None)
     station_name = scrapy.Field()
     latitude = scrapy.Field()
     longitude = scrapy.Field()
