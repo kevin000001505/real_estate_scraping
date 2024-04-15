@@ -21,6 +21,8 @@ class HousingScrapyPipeline:
         self.cursor.close()
         self.connection.close()
     def process_item(self, item, spider):
+        if not item['price']:
+            item['price'] = 0
         if item['year'] is not None and '年' in item['year']:
             item['year'] = int(item['year'].replace("年", ""))
 
