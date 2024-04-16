@@ -1,8 +1,6 @@
 import scrapy
 import json
-from housing_scrapy.items import HousingScrapyItem
-from housing_scrapy.items import RealEstatePriceScrapyItem
-import time
+from housing_scrapy.items import HousingScrapyItem, RealEstatePriceScrapyItem
 
 class ScrapyHouseSpider(scrapy.Spider):
     name = 'scrapy_house'
@@ -149,7 +147,7 @@ class ScrapyHouseSpider(scrapy.Spider):
             real_item['park_price'] = real_item_json.get('real_park_total_price')
             real_item['parking_type'] = real_item_json.get('park_type_str')
             real_item['total_floor'] = real_item_json.get('total_floor')
-            
+
             yield real_item
         
         self.real_page += 1
