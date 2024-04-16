@@ -10,7 +10,6 @@ import mysql.connector
 from housing_scrapy.items import RealEstatePriceScrapyItem
 from housing_scrapy.items import HousingScrapyItem
 from datetime import datetime
-import time
 
 class DataTransformationPipeline:
     def process_item(self, item, spider):
