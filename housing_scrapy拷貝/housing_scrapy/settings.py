@@ -64,7 +64,7 @@ ROBOTSTXT_OBEY = False
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     'housing_scrapy.pipelines.HousingScrapyPipeline': 300,
-    'housing_scrapy.pipelines.SaveToRealEstateDealPipeline': 800
+    'housing_scrapy.pipelines.SaveToRealEstateDealPipeline': 300
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
