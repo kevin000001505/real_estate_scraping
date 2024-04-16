@@ -10,6 +10,7 @@ import mysql.connector
 from housing_scrapy.items import RealEstatePriceScrapyItem
 from housing_scrapy.items import HousingScrapyItem
 from datetime import datetime
+import time
 
 class HousingScrapyPipeline:
     def open_spider(self, spider):
@@ -105,6 +106,8 @@ class HousingScrapyPipeline:
             self.connection.commit()
             
             return item
+
+
 class SaveToRealEstateDealPipeline:
     def open_spider(self, spider):
         self.real_connection = mysql.connector.connect(
@@ -168,4 +171,4 @@ class SaveToRealEstateDealPipeline:
                     unit_price_flo
                 ))
             self.real_connection.commit()
-        return item
+            return item
