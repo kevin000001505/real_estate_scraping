@@ -12,14 +12,14 @@ class ScrapyHouseSpider(scrapy.Spider):
     def __init__(self):
         self.region_num = 1
         self.page = 1
-        self.first_id = 0
+        self.id_list = []
         
     def parse(self, response):
     
         resp = json.loads(response.body)
 
         # check if region_number exists
-        status = int(resp.get('status'))
+        status = resp.get('status')
         if status != 0:
             items = resp['data']['items']
         else:
@@ -31,9 +31,9 @@ class ScrapyHouseSpider(scrapy.Spider):
             )
         
         # check if api data duplicated or no data
-        if not items or items[0]['id'] == self.first_id:
-            self.first_id = 0
+        if not items or items[0]['id'] in self.id_list:
             self.region_num += 1
+            self.id_list = []
             self.page = 1
             yield scrapy.Request(
                 url = f'https://bff.591.com.tw/v2/community/search/list?page=1&regionid={self.region_num}&from=3',
@@ -41,8 +41,7 @@ class ScrapyHouseSpider(scrapy.Spider):
             )
         else:
             # record the first page first data id
-            if self.page == 1:
-                self.first_id = items[0]['id']
+            self.id_list.append(resp['data']['items'][0]['id'])
             # start to get the first page data
             for item_json in items:
                 item = HousingScrapyItem()
