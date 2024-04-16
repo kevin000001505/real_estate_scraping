@@ -9,6 +9,7 @@ from itemadapter import ItemAdapter
 import mysql.connector
 from housing_scrapy.items import RealEstatePriceScrapyItem
 from housing_scrapy.items import HousingScrapyItem
+from datetime import datetime
 
 class HousingScrapyPipeline:
     def open_spider(self, spider):
@@ -108,7 +109,14 @@ class SaveToRealEstateDealPipeline:
 
     def process_item(self, item, spider):
         if isinstance(item, RealEstatePriceScrapyItem):
-            
+            # Date
+            taiwan_date_str = item.get('date', '')
+            year, month, day = map(int, taiwan_date_str.split('-'))
+            gregorian_year = year + 1911
+            date_obj = datetime(gregorian_year, month, day)
+            formatted_date = date_obj.strftime('%Y-%m-%d')
+
+
             # SQL insert
             self.real_cursor.execute("""
                 INSERT INTO real_estate_deal (address, build_area, build_total_price, date, floor, park_area, park_price, parking_type, room, total_build_area, total_floor, unit_price)
