@@ -115,14 +115,23 @@ class SaveToRealEstateDealPipeline:
             gregorian_year = year + 1911
             date_obj = datetime(gregorian_year, month, day)
             formatted_date = date_obj.strftime('%Y-%m-%d')
-
-
+            # Address
+            address_str = item.get('address', '').split(' ')[0]
+            # Build area
+            build_area_str = item.get('build_area', '').replace('坪', '')
+            # build total price
+            build_total_price_flo = float(item.get('build_total_price', '').replace(',', ''))
             # SQL insert
             self.real_cursor.execute("""
                 INSERT INTO real_estate_deal (address, build_area, build_total_price, date, floor, park_area, park_price, parking_type, room, total_build_area, total_floor, unit_price)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """, (
+                    address_str,
+                    build_area_str,
+                    build_total_price_flo,
+                    formatted_date,
                     
+
                 ))
             self.real_connection.commit()
         return item
