@@ -3,6 +3,7 @@ import json
 from housing_scrapy.items import HousingScrapyItem
 from housing_scrapy.items import RealEstatePriceScrapyItem
 import time
+
 class ScrapyHouseSpider(scrapy.Spider):
     name = 'scrapy_house'
     allowed_domains = ['market.591.com.tw', 'bff.591.com.tw']
@@ -16,18 +17,22 @@ class ScrapyHouseSpider(scrapy.Spider):
     def parse(self, response):
     
         resp = json.loads(response.body)
+
         # check if region_number exists
-        try:
+        status = int(resp.get('status'))
+        if status != 0:
             items = resp['data']['items']
-        except KeyError:
+        else:
             print('No such region number: ', self.region_num)
             self.region_num += 1
             yield scrapy.Request(
                 url = f'https://bff.591.com.tw/v2/community/search/list?page=1&regionid={self.region_num}&from=3',
                 callback=self.parse
             )
+        
         # check if api data duplicated or no data
         if not items or items[0]['id'] == self.first_id:
+            self.first_id = 0
             self.region_num += 1
             self.page = 1
             yield scrapy.Request(
