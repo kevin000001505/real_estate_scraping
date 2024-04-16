@@ -26,6 +26,18 @@ class HousingScrapyPipeline:
     
     def process_item(self, item, spider):
         if isinstance(item, HousingScrapyItem):
+
+            price_str = item.get('price', '0').strip()
+            if price_str:
+                try:
+                    price = float(price_str)
+                except ValueError:
+                    # Log the error and handle cases where conversion fails
+                    print(f"Error converting price to float: {price_str}")
+                    price = 0  # Set a default value or handle it another way
+            else:
+                price = 0 
+            
             year = item.get('year', None)
             if year is not None and '年' in year:
                 item['year'] = int(year.replace("年", ""))
@@ -67,7 +79,7 @@ class HousingScrapyPipeline:
                 item.get('rent_num'),
                 item.get('agent_company'),
                 item.get('total_sold'),
-                item.get('price'),
+                price,
                 item.get('station_name'),
                 item.get('latitude'),
                 item.get('longitude'),
