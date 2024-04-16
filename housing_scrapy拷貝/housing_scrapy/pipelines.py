@@ -7,8 +7,7 @@
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
 import mysql.connector
-from housing_scrapy.items import RealEstatePriceScrapyItem
-from housing_scrapy.items import HousingScrapyItem
+from housing_scrapy.items import RealEstatePriceScrapyItem, HousingScrapyItem
 from datetime import datetime
 
 class DataTransformationPipeline:
