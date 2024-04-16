@@ -63,8 +63,8 @@ ROBOTSTXT_OBEY = False
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'housing_scrapy.pipelines.HousingScrapyPipeline': 300,
-    'housing_scrapy.pipelines.SaveToRealEstateDealPipeline': 400
+    'housing_scrapy.pipelines.DataTransformationPipeline': 300,
+    'housing_scrapy.pipelines.DatabaseInsertionPipeline': 500
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)

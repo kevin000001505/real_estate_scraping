@@ -12,7 +12,83 @@ from housing_scrapy.items import HousingScrapyItem
 from datetime import datetime
 import time
 
-class HousingScrapyPipeline:
+class DataTransformationPipeline:
+    def process_item(self, item, spider):
+        if isinstance(item, HousingScrapyItem):
+            item['price'] = self.transform_price(item.get('price', '0'))
+            item['year'] = self.extract_year(item.get('year', ''))
+            item['browse_num'] = self.extract_browse_num(item.get('browse_num', ''))
+            item['public_equipment'] = self.avg_public_equipment(item.get('public_equipment', None))
+            item['cover_percentage'] = self.extract_percentage(item.get('cover_percentage', '0'))
+            item['total_resident'] = self.extract_resident(item.get('total_resident', ''))
+            return item
+        elif isinstance(item, RealEstatePriceScrapyItem):
+            item['date'] = self.format_date(item.get('date', ''))
+            item['address'] = item.get('address', '').split(' ')[0]
+            item['build_area'] = item['build_area'].replace('坪', '')
+            item['build_total_price'] = float(item['build_total_price'].replace(',', ''))
+            item['floor'] = self.transform_floor(item.get('floor', ''))
+            item['total_floor'] = self.transform_total_floor(item.get('total_floor', ''))
+            item['park_area'] = float(item.get('park', 0))
+            item['park_price'] = self.transform_park_price(item.get('park_price', ''))
+            item['total_build_area'] = self.transform_total_build_area(item.get('total_build_area', ''))
+            return item
+    
+    def transform_floor(self, floor_str):
+        try:
+            return int(floor_str.replace('樓', '')) if '樓' in floor_str else None
+        except ValueError:
+            return str(floor_str)
+    def transform_total_floor(self, total_floor_str):
+        return int(total_floor_str.replace('樓', '')) if '樓' in total_floor_str else None
+
+    def transform_total_build_area(self, total_build_area_str):
+        return float(total_build_area_str.replace('坪', '')) if '坪' in total_build_area_str else None
+    def transform_price(self, price_str):
+        try:
+            return float(price_str.strip())
+        except ValueError:
+            print(f"Error converting price to float: {price_str}")
+            return 0
+    def transform_park_price(self, price_str):
+        try:
+            float(price_str)
+        except ValueError:
+            print(f"Error converting park price to float: {price_str}")
+            return 0
+        
+    def extract_year(self, year_str):
+        return int(year_str.replace("年", "")) if '年' in year_str else None
+
+    def extract_browse_num(self, browse_num):
+        return int(browse_num.replace(",", "")) if ',' in browse_num else None
+
+    def avg_public_equipment(self, public):
+        if public and '~' in public:
+            parts = public.replace("%", "").split('~')
+            return (float(parts[0]) + float(parts[1])) / 2
+        return None
+
+    def extract_percentage(self, percent):
+        try:
+            return float(percent.replace("%", "")) if '%' in percent else 0
+        except TypeError:
+            print(f"Error converting percentage to float: {percent}")
+            return None
+
+    def extract_resident(self, resident):
+        try:
+            return int(resident.replace("戶", "").replace(",", "")) if '戶' in resident else None
+        except TypeError:
+            return None
+    def format_date(self, taiwan_date_str):
+        year, month, day = map(int, taiwan_date_str.split('-'))
+        gregorian_year = year + 1911
+        date_obj = datetime(gregorian_year, month, day)
+        return date_obj.strftime('%Y-%m-%d')
+
+
+class DatabaseInsertionPipeline:
     def open_spider(self, spider):
         self.connection = mysql.connector.connect(
             host='localhost',
@@ -21,46 +97,23 @@ class HousingScrapyPipeline:
             database='real_estate_db'
         )
         self.cursor = self.connection.cursor()
+
     def close_spider(self, spider):
         self.cursor.close()
         self.connection.close()
-    
+
     def process_item(self, item, spider):
         if isinstance(item, HousingScrapyItem):
+            # Insert into real estate table
+            self.insert_real_estate(item)
+        elif isinstance(item, RealEstatePriceScrapyItem):
+            # Insert into real estate deal table
+            self.insert_real_estate_deal(item)
+        return item
 
-            price_str = item.get('price', '0').strip()
-            if price_str:
-                try:
-                    price = float(price_str)
-                except ValueError:
-                    # Log the error and handle cases where conversion fails
-                    print(f"Error converting price to float: {price_str}")
-                    price = 0  # Set a default value or handle it another way
-            else:
-                price = 0 
-            
-            year = item.get('year', None)
-            if year is not None and '年' in year:
-                item['year'] = int(year.replace("年", ""))
-
-            browse_num = item.get('browse_num', None)
-            if browse_num and ',' in browse_num:
-                item['browse_num'] = int(browse_num.replace(",", ""))
-
-            public = item.get('public_equipment', None)
-            if public is not None and '~' in public:
-                parts = item['public_equipment'].replace("%", "").split('~')
-                item['public_equipment'] = (float(parts[0])+float(parts[1]))/2
-
-            cover = item.get('cover_percentage', None)
-            if cover is not None and '%' in cover:
-                item['cover_percentage'] = float(item['cover_percentage'].replace("%", ""))
-
-            resident = item.get('total_resident', None)
-            if resident is not None and '戶' in resident:
-                item['total_resident'] = int(item['total_resident'].replace("戶", "").replace(",", ""))
-
-            self.cursor.execute("""
+    def insert_real_estate(self, item):
+        # SQL INSERT statement for HousingScrapyItem
+        self.cursor.execute("""
                 INSERT INTO real_esate_table (name, region, section, simple_address, current_sale_num, building_purpose, 
                                         browse_num, rent_num, agent_company, total_sold, price, station_name, latitude, 
                                         longitude, year, total_resident, building_type, usage_plan, cover_percentage, 
@@ -80,7 +133,7 @@ class HousingScrapyPipeline:
                 item.get('rent_num'),
                 item.get('agent_company'),
                 item.get('total_sold'),
-                price,
+                item.get('price'),
                 item.get('station_name'),
                 item.get('latitude'),
                 item.get('longitude'),
@@ -103,72 +156,27 @@ class HousingScrapyPipeline:
                 item.get('garbage_management'),
                 item.get('school_region')
             ))
-            self.connection.commit()
-            
-            return item
+        self.connection.commit()
+        return item
 
-
-class SaveToRealEstateDealPipeline:
-    def open_spider(self, spider):
-        self.real_connection = mysql.connector.connect(
-            host='localhost',
-            user='root',
-            password='@America155088',
-            database='real_estate_db'
-        )
-        self.real_cursor = self.real_connection.cursor()
-
-    def close_spider(self, spider):
-        self.real_cursor.close()
-        self.real_connection.close()
-
-    def process_item(self, item, spider):
-        if isinstance(item, RealEstatePriceScrapyItem):
-            # Date
-            taiwan_date_str = item.get('date', '')
-            year, month, day = map(int, taiwan_date_str.split('-'))
-            gregorian_year = year + 1911
-            date_obj = datetime(gregorian_year, month, day)
-            formatted_date = date_obj.strftime('%Y-%m-%d')
-            # Address
-            address_str = item.get('address', '').split(' ')[0]
-            # Build area
-            build_area_str = item.get('build_area', '').replace('坪', '')
-            # Build total price
-            build_total_price_flo = float(item.get('build_total_price', '').replace(',', ''))
-            # Floor
-            floor_int = int(item.get('floor', '').replace('樓', ''))
-            # Park area
-            park_area_flo = float(item.get('park', 0))
-            # Park price
-            park_price_flo = float(item.get('park_price', ''))
-            # Park type
-            park_type_str = item.get('parking_type', '')
-            # Room 
-            room_str = item.get('room', '')
-            # Total_build_area
-            total_build_area_flo = float(item.get('total_build_area', '').replace('坪', ''))
-            # Total_floor
-            total_floor_int = int(item.get('total_floor', '').replace('樓', ''))
-            # Unit_price
-            unit_price_flo = float(item.get('unit_price', ''))
-            # SQL insert
-            self.real_cursor.execute("""
+    def insert_real_estate_deal(self, item):
+        # SQL INSERT statement for RealEstatePriceScrapyItem
+        self.cursor.execute("""
                 INSERT INTO real_estate_deal (address, build_area, build_total_price, date, floor, park_area, park_price, parking_type, room, total_build_area, total_floor, unit_price)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """, (
-                    address_str,
-                    build_area_str,
-                    build_total_price_flo,
-                    formatted_date,
-                    floor_int,
-                    park_area_flo,
-                    park_price_flo,
-                    park_type_str,
-                    room_str,
-                    total_build_area_flo,
-                    total_floor_int,
-                    unit_price_flo
+                    item.get('address'),
+                    item.get('build_area'),
+                    item.get('build_total_price'),
+                    item.get('date'),
+                    item.get('floor'),
+                    item.get('park_area'),
+                    item.get('park_price'),
+                    item.get('parking_type'),
+                    item.get('room'),
+                    item.get('total_build_area'),
+                    item.get('total_floor'),
+                    item.get('unit_price')
                 ))
-            self.real_connection.commit()
-            return item
+        self.connection.commit()
+        return item
