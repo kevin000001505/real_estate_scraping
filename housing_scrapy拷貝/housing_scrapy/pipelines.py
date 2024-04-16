@@ -119,8 +119,24 @@ class SaveToRealEstateDealPipeline:
             address_str = item.get('address', '').split(' ')[0]
             # Build area
             build_area_str = item.get('build_area', '').replace('坪', '')
-            # build total price
+            # Build total price
             build_total_price_flo = float(item.get('build_total_price', '').replace(',', ''))
+            # Floor
+            floor_int = int(item.get('floor', '').replace('樓', ''))
+            # Park area
+            park_area_flo = float(item.get('park', 0))
+            # Park price
+            park_price_flo = float(item.get('park_price', ''))
+            # Park type
+            park_type_str = item.get('parking_type', '')
+            # Room 
+            room_str = item.get('room', '')
+            # Total_build_area
+            total_build_area_flo = float(item.get('total_build_area', '').replace('坪', ''))
+            # Total_floor
+            total_floor_int = int(item.get('total_floor', '').replace('樓', ''))
+            # Unit_price
+            unit_price_flo = float(item.get('unit_price', ''))
             # SQL insert
             self.real_cursor.execute("""
                 INSERT INTO real_estate_deal (address, build_area, build_total_price, date, floor, park_area, park_price, parking_type, room, total_build_area, total_floor, unit_price)
@@ -130,8 +146,14 @@ class SaveToRealEstateDealPipeline:
                     build_area_str,
                     build_total_price_flo,
                     formatted_date,
-                    
-
+                    floor_int,
+                    park_area_flo,
+                    park_price_flo,
+                    park_type_str,
+                    room_str,
+                    total_build_area_flo,
+                    total_floor_int,
+                    unit_price_flo
                 ))
             self.real_connection.commit()
         return item
