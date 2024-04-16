@@ -127,14 +127,15 @@ class ScrapyHouseSpider(scrapy.Spider):
                 item['room_management'] = table.xpath(".//li[17]/p/text()").get()
                 item['garbage_management'] = table.xpath(".//li[18]/p/text()").get()
                 item['school_region'] = table.xpath(".//li[19]/p/text()").get()
-        yield item
+            yield item
                 
 
     def extract_real_price_data(self, response):
         real_item = RealEstatePriceScrapyItem()
         real_resp = json.loads(response.body)
         real_items = real_resp['data']['items']
-        
+        if not real_items:
+            return None
         for real_item_json in real_items:
             real_item['date'] = real_item_json.get('date')
             real_item['floor'] = real_item_json.get('shift_floor')
@@ -148,7 +149,7 @@ class ScrapyHouseSpider(scrapy.Spider):
             real_item['park_price'] = real_item_json.get('real_park_total_price')
             real_item['parking_type'] = real_item_json.get('park_type_str')
             real_item['total_floor'] = real_item_json.get('total_floor')
-        if not real_items:
+            
             yield real_item
         
         self.real_page += 1
