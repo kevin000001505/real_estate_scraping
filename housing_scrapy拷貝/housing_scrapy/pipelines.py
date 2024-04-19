@@ -17,7 +17,7 @@ class HousingScrapyPipeline:
         self.connection = mysql.connector.connect(
             host='localhost',
             user='root',
-            password='@America155088',
+            password='your_own_password',
             database='real_estate_db'
         )
         self.cursor = self.connection.cursor()
