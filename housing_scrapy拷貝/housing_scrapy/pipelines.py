@@ -1,12 +1,3 @@
-# Define your item pipelines here
-#
-# Don't forget to add your pipeline to the ITEM_PIPELINES setting
-# See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-
-
-# useful for handling different item types with a single interface
-
-
 
 from itemadapter import ItemAdapter
 import mysql.connector
@@ -108,7 +99,8 @@ class DatabaseInsertionPipeline:
             item['foundation_area'], 
             item['management_cost'], 
             item['ground_separate_area'], 
-            item['battery_filled_equipment'], 
+            item.get('battery_filled_equipment', None),
+            #item['battery_filled_equipment'], 
             item['parking_percentage'],
             item['total_parking_amount'], 
             item['building_amount_management'], 

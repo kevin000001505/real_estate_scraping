@@ -4,10 +4,37 @@
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
+from scrapy.downloadermiddlewares.useragent import UserAgentMiddleware
+import random, logging
 
 # useful for handling different item types with a single interface
 from itemadapter import is_item, ItemAdapter
+class ProxyMiddleware(object):
+    def process_request(self, request, spider):
+        # Set the location of your proxy list
+        proxy_list = [
+            'http://123.205.24.244:8197',
+            'http://103.137.62.253:80',
+            'http://111.247.40.241:80',
+            'http://118.163.120.181:58837'
+            # add more proxies here
+        ]
 
+        # Randomly select a proxy to use for this request
+        request.meta['proxy'] = random.choice(proxy_list)
+
+class UserAgentRotatorMiddleware(UserAgentMiddleware):
+    user_agebts_list = [
+        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36",
+        ]
+    def __init__(self, user_agent=''):
+        self.user_agent = user_agent
+    def process_request(self, request, spider):
+        try:
+            self.user_agent = random.choice(self.user_agebts_list)
+            request.headers.setdefault('User-Agent', self.user_agent)
+        except IndexError:
+            logging.error("Couldn't find user_agebt")
 
 class HousingScrapySpiderMiddleware:
     # Not all methods need to be defined. If a method is not defined,

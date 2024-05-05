@@ -6,6 +6,7 @@ class ScrapyHouseSpider(scrapy.Spider):
     name = 'scrapy_house'
     allowed_domains = ['market.591.com.tw', 'bff.591.com.tw']
     start_urls = ['https://bff.591.com.tw/v2/community/search/list?page=1&regionid=1&from=3']
+    #start_urls = ['https://market.591.com.tw/list']
     
     def __init__(self):
         self.region_num = 1
