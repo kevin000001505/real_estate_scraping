@@ -49,7 +49,10 @@ class DataTransformationPipeline:
 class DatabaseInsertionPipeline:
     def open_spider(self, spider):
         self.connection = mysql.connector.connect(
-            host='localhost', user='root', password='@America155088', database='real_estate_db'
+            host='localhost',
+            user='root',
+            password='your_own_password',
+            database='real_estate_db'
         )
         self.cursor = self.connection.cursor()
 
@@ -116,17 +119,18 @@ class DatabaseInsertionPipeline:
                 INSERT INTO real_estate_deal (address, build_area, build_total_price, date, floor, park_area, park_price, parking_type, room, total_build_area, total_floor, unit_price)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """, (
-            item['address'], 
-            item['build_area'], 
-            item['build_total_price'],
-            item['date'],
-            item['floor'],
-            item['park_area'],
-            item['park_price'],
-            item['parking_type'],
-            item['room'],
-            item['total_build_area'],
-            item['total_floor'],
-            item['unit_price']
-        ))
-        self.connection.commit()
+                    address_str,
+                    build_area_str,
+                    build_total_price_flo,
+                    formatted_date,
+                    floor_int,
+                    park_area_flo,
+                    park_price_flo,
+                    park_type_str,
+                    room_str,
+                    total_build_area_flo,
+                    total_floor_int,
+                    unit_price_flo
+                ))
+            self.real_connection.commit()
+            return item
