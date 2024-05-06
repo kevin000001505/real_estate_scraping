@@ -119,18 +119,17 @@ class DatabaseInsertionPipeline:
                 INSERT INTO real_estate_deal (address, build_area, build_total_price, date, floor, park_area, park_price, parking_type, room, total_build_area, total_floor, unit_price)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """, (
-                    address_str,
-                    build_area_str,
-                    build_total_price_flo,
-                    formatted_date,
-                    floor_int,
-                    park_area_flo,
-                    park_price_flo,
-                    park_type_str,
-                    room_str,
-                    total_build_area_flo,
-                    total_floor_int,
-                    unit_price_flo
+                    item.get('address') or None,
+                    item.get('build_area') or None,
+                    item.get('build_total_price') or None,
+                    item.get('date') or None,
+                    item.get('floor') or None,
+                    item.get('park_area') or None,
+                    item.get('park_price') or None,
+                    item.get('park_type') or None,
+                    item.get('room') or None,
+                    item.get('total_build_area') or None,
+                    item.get('total_floor') or None,
+                    item.get('unit_price') or None,
                 ))
-            self.real_connection.commit()
-            return item
+        self.real_connection.commit()
